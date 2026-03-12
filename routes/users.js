@@ -189,3 +189,44 @@ router.post('/enable', async (req, res) => {
     });
   }
 });
+
+
+// [POST] Disable user by email + username
+router.post('/disable', async (req, res) => {
+  try {
+
+    const { email, username } = req.body;
+
+    if (!email || !username) {
+      return res.status(400).json({
+        message: "Email và username là bắt buộc"
+      });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+      username: username,
+      isDeleted: false
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User không tồn tại"
+      });
+    }
+
+    user.status = false;
+
+    await user.save();
+
+    res.json({
+      message: "User đã bị vô hiệu hóa",
+      user
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: err.message
+    });
+  }
+});
