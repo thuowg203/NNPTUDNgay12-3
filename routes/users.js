@@ -148,3 +148,44 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+
+
+// [POST] Enable user by email + username
+router.post('/enable', async (req, res) => {
+  try {
+
+    const { email, username } = req.body;
+
+    if (!email || !username) {
+      return res.status(400).json({
+        message: "Email và username là bắt buộc"
+      });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+      username: username,
+      isDeleted: false
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User không tồn tại"
+      });
+    }
+
+    user.status = true;
+
+    await user.save();
+
+    res.json({
+      message: "User đã được kích hoạt",
+      user: user
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: err.message
+    });
+  }
+});
