@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 const router = express.Router();
 const Role = require('../schemas/roles');
+const User = require('../schemas/users');
 
 // [GET] Get all roles (not soft-deleted)
 router.get('/', async (req, res) => {
@@ -124,3 +125,29 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+
+// [GET] Get all users by role id
+router.get('/:id/users', async (req, res) => {
+  try {
+
+    const roleId = req.params.id;
+
+    if (!mongoose.isValidObjectId(roleId)) {
+      return res.status(400).json({
+        message: `Invalid role id '${roleId}'`
+      });
+    }
+
+    const users = await User.find({
+      role: roleId,
+      isDeleted: false
+    });
+
+    res.json(users);
+
+  } catch (err) {
+    res.status(500).json({
+      message: err.message
+    });
+  }
+});
